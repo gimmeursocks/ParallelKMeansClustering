@@ -8,11 +8,13 @@ import java.util.List;
 
 public class OpenCSVReader {
 
+    private final static String absLoc = "src/main/resources/";
+
     public static void readDataLineByLine(String file) {
 
         try {
             // add absolute location
-            file = "src/main/resources/csv/" + file;
+            file = absLoc + file;
 
             // Create an object of filereader
             FileReader filereader = new FileReader(file);
@@ -41,7 +43,7 @@ public class OpenCSVReader {
 
         try {
             // add absolute location
-            file = "src/main/resources/csv/" + file;
+            file = absLoc + file;
 
             // Create an object of filereader
             FileReader filereader = new FileReader(file);

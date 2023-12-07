@@ -1,3 +1,5 @@
 .vscode
 .idea
 target/
+src/test/java/com/parallelkmeansclustering/test.cpp
+src/test/java/com/parallelkmeansclustering/lab1_sequential.h
