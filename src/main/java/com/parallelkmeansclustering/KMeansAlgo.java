@@ -75,19 +75,18 @@ public class KMeansAlgo {
         placeInitialCentroids();
 
         WCSS = Double.MAX_VALUE;
-        // double prevWCSS;
+        double prevWCSS;
         int iter = maxIter;
         do {
             assign();
 
             update();
 
-            // prevWCSS = WCSS;
+            prevWCSS = WCSS;
             calcWCSS();
 
             iter--;
-        } while (iter > 0);
-        // } while (iter > 0 && (prevWCSS != WCSS));
+        } while (iter > 0 && diff(prevWCSS));
     }
 
     private void assign() {
@@ -170,6 +169,13 @@ public class KMeansAlgo {
         }
 
         this.WCSS = WCSS;
+    }
+
+    private boolean diff(double prevWCSS) {
+        double diff = Math.abs(prevWCSS - WCSS);
+        diff = Math.round(diff * 100.0) / 100.0;
+        // if diff > 0.01% then continue
+        return diff > Math.abs(WCSS / 1000.0);
     }
 
     public int[] getAssignments() {

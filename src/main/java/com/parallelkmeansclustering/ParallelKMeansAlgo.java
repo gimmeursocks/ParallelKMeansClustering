@@ -55,12 +55,20 @@ public class ParallelKMeansAlgo {
         for (int i = 0; i < maxInit; i++) {
 
             placeInitialCentroids();
-            for (int j = 0; j < maxIter; j++) {
+            WCSS = Double.MAX_VALUE;
+            double prevWCSS;
+            int iter = maxIter;
+            do {
                 forkJoinPool.invoke(new KMeansTask(0, rows));
-                update();
-            }
 
-            calcWCSS();
+                update();
+
+                prevWCSS = WCSS;
+                calcWCSS();
+
+                iter--;
+            } while (iter > 0 && diff(prevWCSS));
+
 
             if (WCSS < bestWCSS) {
                 bestWCSS = WCSS;
@@ -182,6 +190,13 @@ public class ParallelKMeansAlgo {
         }
 
         this.WCSS = WCSS;
+    }
+
+    private boolean diff(double prevWCSS) {
+        double diff = Math.abs(prevWCSS - WCSS);
+        diff = Math.round(diff * 100.0) / 100.0;
+        // if diff > 0.01% then continue
+        return diff > Math.abs(WCSS / 1000.0);
     }
 
     public int[] getAssignments() {

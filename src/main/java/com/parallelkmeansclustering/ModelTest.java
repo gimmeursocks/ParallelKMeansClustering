@@ -2,7 +2,7 @@ package com.parallelkmeansclustering;
 
 public class ModelTest {
     public static void main(String[] args) {
-        OpenCSVReader.CSVFile file = OpenCSVReader.readAllData("20000_encoded_large_data.csv");
+        OpenCSVReader.CSVFile file = OpenCSVReader.readAllData("300000_encoded_large_data.csv");
 
         if (file.data != null) {
 
@@ -22,9 +22,15 @@ public class ModelTest {
                 System.out.printf("%.1f \n", pmodel.getWCSS());
 
                 // int[] ans = model.getAssignments();
+                // int[] pans = pmodel.getAssignments();
 
-                // for (int j = 0; j < 25; j++) {
-                // System.out.print(ans[j]+" ");
+                // for (int j = 0; j < 10; j++) {
+                //     System.out.print(ans[j] + " ");
+                // }
+                // System.out.println();
+
+                // for (int j = 0; j < 10; j++) {
+                //     System.out.print(pans[j] + " ");
                 // }
                 // System.out.println();
 
