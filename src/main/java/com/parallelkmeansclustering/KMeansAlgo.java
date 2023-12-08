@@ -43,6 +43,8 @@ public class KMeansAlgo {
             }
         }
 
+        long startTime = System.nanoTime();
+
         double bestWCSS = Double.MAX_VALUE;
         double[][] bestCentroids = new double[k][cols];
         int[] bestAssignments = new int[rows];
@@ -60,24 +62,32 @@ public class KMeansAlgo {
         WCSS = bestWCSS;
         centroids = bestCentroids;
         assignments = bestAssignments;
+
+        long endTime = System.nanoTime();
+
+        long executionTime = (endTime - startTime) / 1000000;
+
+        System.out.println("Sequential K-means takes "
+                + executionTime + "ms");
     }
 
     private void cluster() {
         placeInitialCentroids();
 
         WCSS = Double.MAX_VALUE;
-        double prevWCSS;
+        // double prevWCSS;
         int iter = maxIter;
         do {
             assign();
 
             update();
 
-            prevWCSS = WCSS;
+            // prevWCSS = WCSS;
             calcWCSS();
 
             iter--;
-        } while (iter > 0 && (prevWCSS != WCSS));
+        } while (iter > 0);
+        // } while (iter > 0 && (prevWCSS != WCSS));
     }
 
     private void assign() {
@@ -89,7 +99,7 @@ public class KMeansAlgo {
             minDist = Double.MAX_VALUE;
             minInd = 0;
             for (int j = 0; j < k; j++) {
-                tempDist = distance(data[i], centroids[j]);
+                tempDist = euclid(data[i], centroids[j]);
                 if (tempDist < minDist) {
                     minDist = tempDist;
                     minInd = j;
@@ -125,12 +135,8 @@ public class KMeansAlgo {
     }
 
     private void placeInitialCentroids() {
-        Random r = new Random();
-        for (double[] centroid : centroids) {
-            for (int i = 0; i < cols; i++) {
-                double rand = minCol[i] + (r.nextDouble() * (maxCol[i] - minCol[i]));
-                centroid[i] = Math.round(rand * 10.0) / 10.0;
-            }
+        for (int i = 0; i < k; i++) {
+            placeInitialCentroid(i);
         }
     }
 
@@ -142,21 +148,25 @@ public class KMeansAlgo {
         }
     }
 
-    public static double distance(double[] x, double[] y) {
+    private static double distance(double[] x, double[] y) {
         double dist = 0;
 
         for (int i = 0; i < x.length; i++) {
             dist += Math.pow(x[i] - y[i], 2);
         }
 
-        return Math.sqrt(dist);
+        return dist;
+    }
+
+    private static double euclid(double[] x, double[] y) {
+        return Math.sqrt(distance(x, y));
     }
 
     private void calcWCSS() {
         double WCSS = 0;
 
         for (int i = 0; i < rows; i++) {
-            WCSS += Math.pow(distance(data[i], centroids[assignments[i]]), 2);
+            WCSS += distance(data[i], centroids[assignments[i]]);
         }
 
         this.WCSS = WCSS;

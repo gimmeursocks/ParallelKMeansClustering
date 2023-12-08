@@ -45,17 +45,22 @@ public class ParallelKMeansAlgo {
             }
         }
 
+        long startTime = System.nanoTime();
+
         double bestWCSS = Double.MAX_VALUE;
         double[][] bestCentroids = new double[k][cols];
         int[] bestAssignments = new int[rows];
 
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
         for (int i = 0; i < maxInit; i++) {
 
-            centroidInitialize();
-            ForkJoinPool forkJoinPool = new ForkJoinPool();
-            forkJoinPool.invoke(new KMeansTask(0, rows));
+            placeInitialCentroids();
+            for (int j = 0; j < maxIter; j++) {
+                forkJoinPool.invoke(new KMeansTask(0, rows));
+                update();
+            }
 
-            calcWCSS(0, rows);
+            calcWCSS();
 
             if (WCSS < bestWCSS) {
                 bestWCSS = WCSS;
@@ -67,14 +72,21 @@ public class ParallelKMeansAlgo {
         WCSS = bestWCSS;
         centroids = bestCentroids;
         assignments = bestAssignments;
+
+        long endTime = System.nanoTime();
+
+        long executionTime = (endTime - startTime) / 1000000;
+
+        System.out.println("Parallel K-means takes "
+                + executionTime + "ms");
     }
 
     private class KMeansTask extends RecursiveAction {
-        private static final int THRESHOLD = 100;
+        private static final int THRESHOLD = 1000;
         private int start;
         private int end;
 
-        public KMeansTask(int start, int end) {
+        private KMeansTask(int start, int end) {
             this.start = start;
             this.end = end;
         }
@@ -82,16 +94,7 @@ public class ParallelKMeansAlgo {
         @Override
         protected void compute() {
             if (end - start <= THRESHOLD) {
-                int iter = maxIter;
-
-                do {
-                    parallelAssign(start, end);
-
-                    parallelUpdate(start, end);
-
-                    iter--;
-                } while (iter > 0);
-
+                parallelAssign(start, end);
             } else {
                 int mid = start + (end - start) / 2;
                 invokeAll(
@@ -107,49 +110,43 @@ public class ParallelKMeansAlgo {
                 int minInd = 0;
 
                 for (int j = 0; j < k; j++) {
-                    tempDist = distance(data[i], centroids[j]);
+                    tempDist = euclid(data[i], centroids[j]);
                     if (tempDist < minDist) {
                         minDist = tempDist;
                         minInd = j;
                     }
                 }
-
-                synchronized(assignments){
-                    assignments[i] = minInd;
-                }
-            }
-        }
-
-        private void parallelUpdate(int start, int end) {
-            for (double[] centroid : centroids) {
-                java.util.Arrays.fill(centroid, 0);
-            }
-
-            int[] centroidCount = new int[k];
-
-            synchronized(centroids){
-
-                for (int i = start; i < end; i++) {
-                    centroidCount[assignments[i]]++;
-                    for (int j = 0; j < cols; j++) {
-                        centroids[assignments[i]][j] += data[i][j];
-                    }
-                }
-    
-                for (int i = 0; i < k; i++) {
-                    if (centroidCount[i] != 0) {
-                        for (int j = 0; j < cols; j++) {
-                            centroids[i][j] /= centroidCount[i];
-                        }
-                    } else {
-                        placeInitialCentroid(i);
-                    }
-                }
+                assignments[i] = minInd;
             }
         }
     }
 
-    private void centroidInitialize() {
+    private void update() {
+        for (double[] centroid : centroids) {
+            java.util.Arrays.fill(centroid, 0);
+        }
+
+        int[] centroidCount = new int[k];
+
+        for (int i = 0; i < rows; i++) {
+            centroidCount[assignments[i]]++;
+            for (int j = 0; j < cols; j++) {
+                centroids[assignments[i]][j] += data[i][j];
+            }
+        }
+
+        for (int i = 0; i < k; i++) {
+            if (centroidCount[i] != 0) {
+                for (int j = 0; j < cols; j++) {
+                    centroids[i][j] /= centroidCount[i];
+                }
+            } else {
+                placeInitialCentroid(i);
+            }
+        }
+    }
+
+    private void placeInitialCentroids() {
         for (int i = 0; i < k; i++) {
             placeInitialCentroid(i);
         }
@@ -163,21 +160,25 @@ public class ParallelKMeansAlgo {
         }
     }
 
-    public static double distance(double[] x, double[] y) {
+    private static double distance(double[] x, double[] y) {
         double dist = 0;
 
         for (int i = 0; i < x.length; i++) {
             dist += Math.pow(x[i] - y[i], 2);
         }
 
-        return Math.sqrt(dist);
+        return dist;
     }
 
-    private void calcWCSS(int start, int end) {
+    private static double euclid(double[] x, double[] y) {
+        return Math.sqrt(distance(x, y));
+    }
+
+    private void calcWCSS() {
         double WCSS = 0;
 
-        for (int i = start; i < end; i++) {
-            WCSS += Math.pow(distance(data[i], centroids[assignments[i]]), 2);
+        for (int i = 0; i < rows; i++) {
+            WCSS += distance(data[i], centroids[assignments[i]]);
         }
 
         this.WCSS = WCSS;

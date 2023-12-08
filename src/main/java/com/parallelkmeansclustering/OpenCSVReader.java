@@ -74,4 +74,15 @@ public class OpenCSVReader {
 
         return null;
     }
+
+    public static class CSVFile {
+        public double[][] data;
+        public String[] colNames;
+    
+        public CSVFile(String[] colNames, double[][] data){
+            this.colNames = colNames;
+            this.data = data;
+        }
+    }
+    
 }

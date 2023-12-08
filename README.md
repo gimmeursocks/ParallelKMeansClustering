@@ -12,5 +12,6 @@ git clone https://github.com/gimmeursocks/ParallelKMeansClustering.git
 ## Running
 After the installation on your local pc, run the following command:
 ```
-mvn clean javafx:run
+mvn install clean
+mvn compile exec:java
 ```

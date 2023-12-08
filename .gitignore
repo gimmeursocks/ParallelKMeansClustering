@@ -1,5 +1,5 @@
 .vscode
 .idea
 target/
-src/test/java/com/parallelkmeansclustering/test.cpp
-src/test/java/com/parallelkmeansclustering/lab1_sequential.h
+src/main/resources/large_data.csv
+src/main/resources/preprocessing.ipynb
