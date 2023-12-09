@@ -1,7 +1,7 @@
 package com.parallelkmeansclustering;
 
-import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ForkJoinPool;
 
 public class ParallelKMeansAlgo {
@@ -161,9 +161,8 @@ public class ParallelKMeansAlgo {
     }
 
     private void placeInitialCentroid(int clusterInd) {
-        Random r = new Random();
         for (int i = 0; i < cols; i++) {
-            double rand = minCol[i] + (r.nextDouble() * (maxCol[i] - minCol[i]));
+            double rand = minCol[i] + (ThreadLocalRandom.current().nextDouble() * (maxCol[i] - minCol[i]));
             centroids[clusterInd][i] = Math.round(rand * 10.0) / 10.0;
         }
     }

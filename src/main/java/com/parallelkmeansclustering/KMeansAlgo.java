@@ -140,7 +140,7 @@ public class KMeansAlgo {
     }
 
     private void placeInitialCentroid(int clusterInd) {
-        Random r = new Random();
+        Random r = new Random(System.currentTimeMillis());
         for (int i = 0; i < cols; i++) {
             double rand = minCol[i] + (r.nextDouble() * (maxCol[i] - minCol[i]));
             centroids[clusterInd][i] = Math.round(rand * 10.0) / 10.0;

@@ -42,6 +42,7 @@
           </executions>
           <configuration>
               <mainClass>com.parallelkmeansclustering.ModelTest</mainClass>
+              <cleanupDaemonThreads>false</cleanupDaemonThreads>
           </configuration>
       </plugin>
       </plugins>
